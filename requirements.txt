@@ -1,0 +1,5 @@
+openai
+flask
+requests
+line-bot-sdk
+langchain

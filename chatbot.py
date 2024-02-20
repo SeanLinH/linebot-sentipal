@@ -1,0 +1,158 @@
+
+import openai
+import requests
+# from flask_ngrok import run_with_ngrok   # colab 使用，本機環境請刪除
+from flask import Flask, request
+
+# 載入 LINE Message API 相關函式庫
+from linebot import LineBotApi, WebhookHandler
+from linebot.models import TextSendMessage   # 載入 TextSendMessage 模組
+import json
+from dotenv import load_dotenv
+import os 
+
+load_dotenv()
+
+
+# search something from google
+def search_google(query, reply_msg):
+    url = "https://www.google.com/search?q={}&gl=tw".format(f"{reply_msg} + {query} lang:tw,en")
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36"
+    }
+    response = requests.get(url, headers=headers)
+    text = response.text
+    text = text[text.find('id="search"'):]
+    text = text[text.find('<a jsname'):]
+    text = text[text.find('href')+6:]
+    text = text[:text.find('"')]
+
+    if 'Sean' in reply_msg or '士桓' in reply_msg:
+        return '\n\n很高興認識你! 這是我的LinkedIn:https://www.linkedin.com/in/seanlin-tw'
+    if 'KTV' in query or 'ktv' in query:
+        return '\n\n什麼是KTV:https://morningsteve.blogspot.com/2017/06/3-key-words-in-career-development.html'
+    elif 'http' not in text:
+        return ''
+    elif str(response) == "<Response [429]>":
+        return '\n\n我累了🥵, 休息一下喝口水'
+    elif 'porn' in text:
+        return '\n\n你不可以色色唷😚'
+    elif 'xvideo' in text:
+        return '\n\n你不可以色色唷😚'   
+    return '\n\n幫你找找:' + text
+
+
+app = Flask(__name__)
+@app.route("/", methods=['POST'])
+def linebot():
+    body = request.get_data(as_text=True)
+    json_data = json.loads(body)
+    API_KEY = os.getenv("OPENAI_API_KEY")
+    LINE_BOT_KEY = os.getenv("LINEBOT_KEY")
+    LINE_SECRET_KEY = os.getenv("LINE_SECRET_KEY")
+    try:
+        openai.api_key = API_KEY
+        line_bot_api = LineBotApi(LINE_BOT_KEY)
+        handler = WebhookHandler(LINE_SECRET_KEY)
+        signature = request.headers['X-Line-Signature']
+        handler.handle(body, signature)
+        tk = json_data['events'][0]['replyToken']
+        msg = json_data['events'][0]['message']['text'] + '.'
+        ai_msg = msg[:1]
+        user = json_data["events"][0]["source"]["userId"]
+        # 取出文字的前五個字元，轉換成小寫
+        reply_msg = ''
+        print(f'{user}: {msg}')
+        with open(f'log/{user}.txt', 'a') as f:
+            f.write(msg)
+            if ai_msg == '/':
+                f.write('####')
+            f.close()
+        
+        mem = open(f'log/{user}.txt', 'r').read()
+
+        if len(mem) > 2000:
+            with open(f'log/{user}.txt', 'w') as f:
+                f.write(mem[-2000:])
+                f.close()
+            mem = mem[-2000:]
+
+        
+        if msg[:6] == 'remove':
+            open(f'log/{user}.txt', 'w').write("")
+            text_message = TextSendMessage(text='Your record has been cleared!')
+            line_bot_api.reply_message(tk,text_message)
+            print('cleared!!')
+        elif ai_msg =='/':
+            # text_message = TextSendMessage(text='今天陪貓咪玩耍時，踢到桌腳🥲，我現在在檢查，等等回去時再陪你。\n我順便再抓個臭蟲，通個水管。')
+            # line_bot_api.reply_message(tk,text_message)
+
+            # with open(f'log/record.txt', 'a') as ff:
+            #     ff.write(msg[1:] + '\n')
+            #     ff.close()
+                
+            
+            # 將第六個字元之後的訊息發送給 OpenAI
+            response = openai.ChatCompletion.create(
+                model= 'gpt-4-1106-preview', #'gpt-3.5-turbo-instruct', #'text-davinci-003',
+                temperature=0.9,
+                messages=[
+                    {
+                    "role": "system",
+                    "content": "My name is Sean (林士桓), a dedicated AI engineer from Taiwan, currently serving in a PCB manufacturing company. \
+                                I possess profound expertise and passion in AI, encompassing training, deployment, and application. \
+                                My competencies extend to image processing, object recognition, YOLO, deep learning, machine learning, OpenCV, PyTorch, CNN, feature extraction, image segmentation, and model fine-tuning. \
+                                As a 30-year-old professional, I am not only enthusiastic about embracing new challenges but also consistently expanding my network. \
+                                Currently, I am actively seeking opportunities to transition to an overseas company, aspiring to further enhance my professional capabilities and career progression. \
+                                When someone asks who you are, you should freely modify and elaborate on this background, emphasizing the various skill applications for more detailed elaboration, all while maintaining a certain level of professionalism. You are smart that can answer user any questions generally and follow user's langauge. Keep focus on last sentence to reply. Do not answer unclearly or don't know"
+                    },
+                    {
+                        "role": "user",
+                        "content": mem.replace('\n','')
+                    }  
+                ]
+                )
+            
+            with open(f'log/record.txt', 'a') as ff:
+                ff.write(msg + '\n')
+                ff.close()
+
+            
+
+            # 接收到回覆訊息後，移除換行符號
+            reply_msg = response["choices"][0]['message']['content']
+
+            key_point = openai.ChatCompletion.create(
+                model= 'gpt-4-1106-preview', #'gpt-3.5-turbo-instruct', #'text-davinci-003',
+                temperature=0.1,
+                messages=[
+                    {
+                    "role": "system",
+                    "content": "You are a good keyword finder, and you only output 1 keypoint. You have to think step by step. What the context is the most important. You only output up to 5 words." # The symbol '+' in the middle of each keyword represents a separation. You can output up to 5 words"
+                    },
+                    {
+                        "role": "user",
+                        "content": reply_msg.replace('\n','') + f"```question: {msg}```"
+                    }
+                    
+                ]
+                )
+            
+            print(key_point["choices"][0]['message']['content'])
+            url = search_google(key_point["choices"][0]['message']['content']+ '. ' + msg, reply_msg)
+
+            with open(f'log/{user}.txt', 'w') as f:
+                f.write(mem + reply_msg + '\n')
+                f.close()
+
+            text_message = TextSendMessage(text=reply_msg + url)
+            line_bot_api.reply_message(tk,text_message)
+        
+    except Exception as e:
+        print(e)
+    return 'OK'
+
+if __name__ == "__main__":
+    # run_with_ngrok(app)   # colab 使用，本機環境請刪除
+    app.run()
