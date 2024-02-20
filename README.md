@@ -7,7 +7,6 @@ Welcome to SentiPal, an advanced chatbot service designed to bridge the gap betw
 - **Emotion Detection:** Harnesses sophisticated algorithms to detect emotions like joy, sadness, anger, and more, ensuring every interaction is emotionally attuned.
 - **Personalized Responses:** Tailors interactions based on detected emotions for a truly personalized user experience.
 - **Adaptive Learning:** Continuously improves through interactions, adapting to the nuanced ways humans express emotions.
-- **Multilingual Support:** Breaks language barriers, offering a wide range of language compatibilities for global reach.
 - **Flexible Integration:** Easily integrates with various platforms, enhancing customer service, e-commerce, and social media engagements.
 - **Privacy & Security:** Prioritizes user privacy with robust data protection measures, ensuring interactions are secure and confidential.
 
