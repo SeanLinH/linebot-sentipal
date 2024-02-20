@@ -1,4 +1,4 @@
-# linebot-sentipal
+# linebot-SentiPal
 
 Welcome to SentiPal, an advanced chatbot service designed to bridge the gap between human emotions and digital communication. Levering state-of-the-art AI and NLP technologies, SentiPal is not just a chatbot; it's your empathetic digital companion, understanding and responding to a wide spectrum of human emotions through text.
 
