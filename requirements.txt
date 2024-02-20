@@ -3,3 +3,4 @@ flask
 requests
 line-bot-sdk
 langchain
+python-dotenv
