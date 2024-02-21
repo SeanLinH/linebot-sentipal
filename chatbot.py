@@ -30,16 +30,10 @@ def search_google(query, reply_msg):
 
     if 'Sean' in reply_msg or '士桓' in reply_msg:
         return '\n\n很高興認識你! 這是我的LinkedIn:https://www.linkedin.com/in/seanlin-tw'
-    if 'KTV' in query or 'ktv' in query:
-        return '\n\n什麼是KTV:https://morningsteve.blogspot.com/2017/06/3-key-words-in-career-development.html'
     elif 'http' not in text:
         return ''
     elif str(response) == "<Response [429]>":
         return '\n\n我累了🥵, 休息一下喝口水'
-    elif 'porn' in text:
-        return '\n\n你不可以色色唷😚'
-    elif 'xvideo' in text:
-        return '\n\n你不可以色色唷😚'   
     return '\n\n幫你找找:' + text
 
 
