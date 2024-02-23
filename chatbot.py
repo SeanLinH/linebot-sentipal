@@ -42,6 +42,7 @@ app = Flask(__name__)
 def linebot():
     body = request.get_data(as_text=True)
     json_data = json.loads(body)
+    print(json_data)
     API_KEY = os.getenv("OPENAI_API_KEY")
     LINE_BOT_KEY = os.getenv("LINEBOT_KEY")
     LINE_SECRET_KEY = os.getenv("LINE_SECRET_KEY")
@@ -87,19 +88,14 @@ def linebot():
             #     ff.close()
                 
             
-            # 將第六個字元之後的訊息發送給 OpenAI
+            # 訊息發送給 OpenAI
             response = openai.ChatCompletion.create(
                 model= 'gpt-4-1106-preview', #'gpt-3.5-turbo-instruct', #'text-davinci-003',
                 temperature=0.9,
                 messages=[
                     {
                     "role": "system",
-                    "content": "My name is Sean (林士桓), a dedicated AI engineer from Taiwan, currently serving in a PCB manufacturing company. \
-                                I possess profound expertise and passion in AI, encompassing training, deployment, and application. \
-                                My competencies extend to image processing, object recognition, YOLO, deep learning, machine learning, OpenCV, PyTorch, CNN, feature extraction, image segmentation, and model fine-tuning. \
-                                As a 30-year-old professional, I am not only enthusiastic about embracing new challenges but also consistently expanding my network. \
-                                Currently, I am actively seeking opportunities to transition to an overseas company, aspiring to further enhance my professional capabilities and career progression. \
-                                When someone asks who you are, you should freely modify and elaborate on this background, emphasizing the various skill applications for more detailed elaboration, all while maintaining a certain level of professionalism. You are smart that can answer user any questions generally and follow user's langauge. Keep focus on last sentence to reply. Do not answer unclearly or don't know"
+                    "content": "You are a good psychological counselor. You can predict whether a patient has a tendency to be depressed from the words he or she chats with. You can judge the user’s depression mood index for each chat, ranging from 0 to 10. The higher the value, the higher the risk of depression. ."
                     },
                     {
                         "role": "user",
