@@ -4,3 +4,5 @@ requests
 line-bot-sdk
 langchain
 python-dotenv
+torch 
+transformers

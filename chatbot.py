@@ -89,7 +89,7 @@ def linebot():
                 
             
             # 訊息發送給 OpenAI
-            response = openai.ChatCompletion.create(
+            response = openai.chat.completions.create(
                 model= 'gpt-4-1106-preview', #'gpt-3.5-turbo-instruct', #'text-davinci-003',
                 temperature=0.9,
                 messages=[
@@ -111,9 +111,9 @@ def linebot():
             
 
             # 接收到回覆訊息後，移除換行符號
-            reply_msg = response["choices"][0]['message']['content']
+            reply_msg = response.choices[0].message.content
 
-            key_point = openai.ChatCompletion.create(
+            key_point = openai.chat.completions.create(
                 model= 'gpt-4-1106-preview', #'gpt-3.5-turbo-instruct', #'text-davinci-003',
                 temperature=0.1,
                 messages=[
@@ -129,8 +129,8 @@ def linebot():
                 ]
                 )
             
-            print(key_point["choices"][0]['message']['content'])
-            url = search_google(key_point["choices"][0]['message']['content']+ '. ' + msg, reply_msg)
+            print(key_point.choices[0].message.content)
+            url = search_google(key_point.choices[0].message.content + '. ' + msg, reply_msg)
 
             with open(f'log/{user}.txt', 'w') as f:
                 f.write(mem + reply_msg + '\n')
