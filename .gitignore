@@ -91,7 +91,7 @@ ENV/
 env.bak/
 venv.bak/
 log/
-db/
+*.db
 
 
 # Spyder project settings
