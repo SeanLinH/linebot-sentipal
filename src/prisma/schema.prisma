@@ -1,0 +1,84 @@
+datasource db {
+  provider = "sqlite"
+//   url      = env("DATABASE_URL")
+  url      = "file:../db/sqlite-sentipal.db"
+}
+
+generator client {
+  provider             = "prisma-client-py"
+  interface            = "asyncio"
+  recursive_type_depth = 5
+}
+
+// generator dbml {
+//   provider = "prisma-dbml-generator"
+// }
+
+
+model Mood {
+  user_id String
+  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  group_id String?
+  user_text String
+//   user_mood Json
+  user_mood String?
+  mood_score Int @default(0)
+  stable_score Int @default(0)
+  engage Int @default(0)
+  timestamp DateTime @unique @default(now())
+
+  lastUser User? @relation(name: "LastMoodToUser")
+}
+
+model Response {
+  user_id String?
+  user User? @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  group_id String
+  ai_text String
+  timestamp DateTime @unique @default(now())
+
+  lastUser User? @relation(name: "LastResponseToUser")
+}
+
+model UserApi {
+  user_id String @unique
+  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  user_api String
+  timestamp DateTime @default(now()) @updatedAt
+  group_ids Group[]
+}
+
+model Group {
+  group_id String @unique
+  user_id String
+  userApi UserApi @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+}
+
+model GroupApi {
+  group_id String @unique
+  user_api String
+}
+
+// enum UserApiRole {
+//   general
+//   case
+//   assistant
+// }
+
+model User {
+  user_id String @id
+  // user_role UserApiRole
+  user_role String
+  summary String?
+  
+  lastmood_timestamp DateTime? @unique
+  lastmood Mood? @relation(name: "LastMoodToUser", fields: [lastmood_timestamp], references: [timestamp], onDelete: SetNull)
+  
+  lastresponse_timestamp DateTime? @unique
+  lastresponse Response? @relation(name: "LastResponseToUser", fields: [lastresponse_timestamp], references: [timestamp], onDelete: SetNull)
+
+  moodHistory Mood[]
+  responseHistory Response[]
+  userApi UserApi?
+}
+
