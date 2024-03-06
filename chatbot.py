@@ -40,6 +40,7 @@ def search_google(query, reply_msg):
 app = Flask(__name__)
 @app.route("/", methods=['POST'])
 def linebot():
+    print("hello")
     body = request.get_data(as_text=True)
     json_data = json.loads(body)
     print(json_data)
