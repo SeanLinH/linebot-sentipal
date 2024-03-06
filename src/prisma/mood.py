@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from util import nowTimeStampISO
+from src.prisma.util import nowTimeStampISO
 
 @dataclass(kw_only=True)
 class Mood:

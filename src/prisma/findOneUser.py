@@ -1,7 +1,7 @@
 import asyncio
 from prisma import Prisma
-from user import User
-from util import glog
+from src.prisma.user import User
+from src.prisma.util import glog
 
 async def find_one_user_core(db: Prisma, userId: str) -> User:
 	bingo = await db.user.find_unique(
