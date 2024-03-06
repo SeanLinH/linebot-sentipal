@@ -48,7 +48,7 @@ def key_point(reply, msg):
     return response.choices[0].message.content
 
 
-def mood_score(user_id, group_id, text, mood,score):
+# def mood_score(user_id, group_id, text, mood,score):
     
 
 

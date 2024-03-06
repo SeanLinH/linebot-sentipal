@@ -11,6 +11,7 @@ import json
 from dotenv import load_dotenv
 import os 
 from api import ChatGPT
+from api.huggingface import Models
 
 load_dotenv()
 
@@ -39,10 +40,10 @@ def search_google(query):
 app = Flask(__name__)
 @app.route("/", methods=['POST'])
 def linebot():
-    print("hello")
+
     body = request.get_data(as_text=True)
     json_data = json.loads(body)
-    print(json_data)
+    # print(json_data)
     API_KEY = os.getenv("OPENAI_API_KEY")
     LINE_BOT_KEY = os.getenv("LINEBOT_KEY")
     LINE_SECRET_KEY = os.getenv("LINE_SECRET_KEY")
@@ -56,15 +57,17 @@ def linebot():
         msg = json_data['events'][0]['message']['text'] + '.'
         user = json_data["events"][0]["source"]["userId"]
         group = json_data["events"][0]['source'].get('groupId')
-
+        hf = Models(msg)
+        mood = hf.go_emotion()
+        mood_score = hf.detect_depression()
         
-
+        print(mood[0][0]['label'], mood_score[0][0]['label'])
         
         ai_msg = msg[:1] #啟動咒語
         
         # 取出文字的前五個字元，轉換成小寫
         reply_msg = ''
-        print(f'{user}: {msg}')
+        # print(f'{user}: {msg}')
         with open(f'log/{user}.txt', 'a') as f:
             f.write(msg)
             if ai_msg == '/':
@@ -104,7 +107,7 @@ def linebot():
             # 接收到回覆訊息後，移除換行符號
             reply_msg = ChatGPT.general_response(mem)        
             key_point = ChatGPT.key_point(reply_msg, msg)
-            print(key_point)
+            # print(key_point)
             
             url = search_google(f"{key_point} and {msg}")
 
