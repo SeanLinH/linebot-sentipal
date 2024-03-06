@@ -41,14 +41,11 @@ def search_google(query, reply_msg):
 
 app = Flask(__name__)
 @app.route("/", methods=['POST'])
-
 def linebot_endpont():
     asyncio.run(linebot())
     return 'OK'
 
 async def linebot() -> None:
-
-def linebot():
     body = request.get_data(as_text=True)
     json_data = json.loads(body)
     glog(json_data)
@@ -139,4 +136,4 @@ def linebot():
 
 if __name__ == "__main__":
     # run_with_ngrok(app)   # colab 使用，本機環境請刪除
-    asyncio.run(app.run())
+    app.run()
