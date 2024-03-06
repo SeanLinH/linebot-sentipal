@@ -1,0 +1,69 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table Mood {
+  user_id String [not null]
+  user User [not null]
+  group_id String [not null]
+  user_text String [not null]
+  user_mood String [not null]
+  mood_score Int [not null]
+  stable_score Int [not null]
+  engage Int [not null]
+  timestamp DateTime [unique, not null]
+  lastUser User
+}
+
+Table Response {
+  user_id String
+  user User
+  group_id String [not null]
+  ai_text String [not null]
+  timestamp DateTime [unique, not null]
+  lastUser User
+}
+
+Table UserApi {
+  user_id String [unique, not null]
+  user User [not null]
+  user_api String [not null]
+  timestamp DateTime [not null]
+  group_ids Group [not null]
+}
+
+Table Group {
+  group_id String [unique, not null]
+  user_id String [not null]
+  userApi UserApi [not null]
+}
+
+Table GroupApi {
+  group_id String [unique, not null]
+  user_api String [not null]
+}
+
+Table User {
+  user_id String [pk]
+  user_role String [not null]
+  summary String
+  lastmood_timestamp DateTime [unique]
+  lastmood Mood
+  lastresponse_timestamp DateTime [unique]
+  lastresponse Response
+  moodHistory Mood [not null]
+  responseHistory Response [not null]
+  userApi UserApi
+}
+
+Ref: Mood.user_id - User.user_id [delete: Cascade]
+
+Ref: Response.user_id - User.user_id [delete: Cascade]
+
+Ref: UserApi.user_id - User.user_id [delete: Cascade]
+
+Ref: Group.user_id > UserApi.user_id [delete: Cascade]
+
+Ref: User.lastmood_timestamp - Mood.timestamp [delete: Set Null]
+
+Ref: User.lastresponse_timestamp - Response.timestamp [delete: Set Null]
