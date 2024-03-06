@@ -10,13 +10,15 @@ from linebot.models import TextSendMessage   # 載入 TextSendMessage 模組
 import json
 from dotenv import load_dotenv
 import os 
+from api import ChatGPT
+from api.huggingface import Models
 
 load_dotenv()
 
 
 # search something from google
-def search_google(query, reply_msg):
-    url = "https://www.google.com/search?q={}&gl=tw".format(f"{reply_msg} + {query} lang:tw,en")
+def search_google(query):
+    url = "https://www.google.com/search?q={}&gl=tw".format(f"{query} lang:tw,en")
     headers = {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
         "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36"
@@ -28,9 +30,7 @@ def search_google(query, reply_msg):
     text = text[text.find('href')+6:]
     text = text[:text.find('"')]
 
-    if 'Sean' in reply_msg or '士桓' in reply_msg:
-        return '\n\n很高興認識你! 這是我的LinkedIn:https://www.linkedin.com/in/seanlin-tw'
-    elif 'http' not in text:
+    if 'http' not in text:
         return ''
     elif str(response) == "<Response [429]>":
         return '\n\n我累了🥵, 休息一下喝口水'
@@ -40,10 +40,10 @@ def search_google(query, reply_msg):
 app = Flask(__name__)
 @app.route("/", methods=['POST'])
 def linebot():
-    print("hello")
+
     body = request.get_data(as_text=True)
     json_data = json.loads(body)
-    print(json_data)
+    # print(json_data)
     API_KEY = os.getenv("OPENAI_API_KEY")
     LINE_BOT_KEY = os.getenv("LINEBOT_KEY")
     LINE_SECRET_KEY = os.getenv("LINE_SECRET_KEY")
@@ -55,11 +55,19 @@ def linebot():
         handler.handle(body, signature)
         tk = json_data['events'][0]['replyToken']
         msg = json_data['events'][0]['message']['text'] + '.'
-        ai_msg = msg[:1]
         user = json_data["events"][0]["source"]["userId"]
+        group = json_data["events"][0]['source'].get('groupId')
+        hf = Models(msg)
+        mood = hf.go_emotion()
+        mood_score = hf.detect_depression()
+        
+        print(mood[0][0]['label'], mood_score[0][0]['label'])
+        
+        ai_msg = msg[:1] #啟動咒語
+        
         # 取出文字的前五個字元，轉換成小寫
         reply_msg = ''
-        print(f'{user}: {msg}')
+        # print(f'{user}: {msg}')
         with open(f'log/{user}.txt', 'a') as f:
             f.write(msg)
             if ai_msg == '/':
@@ -89,49 +97,19 @@ def linebot():
             #     ff.close()
                 
             
-            # 訊息發送給 OpenAI
-            response = openai.chat.completions.create(
-                model= 'gpt-4-1106-preview', #'gpt-3.5-turbo-instruct', #'text-davinci-003',
-                temperature=0.9,
-                messages=[
-                    {
-                    "role": "system",
-                    "content": "You are a good psychological counselor. You can predict whether a patient has a tendency to be depressed from the words he or she chats with. You can judge the user’s depression mood index for each chat, ranging from 0 to 10. The higher the value, the higher the risk of depression. ."
-                    },
-                    {
-                        "role": "user",
-                        "content": mem.replace('\n','')
-                    }  
-                ]
-                )
             
             with open(f'log/record.txt', 'a') as ff:
                 ff.write(msg + '\n')
                 ff.close()
-
+        
             
 
             # 接收到回覆訊息後，移除換行符號
-            reply_msg = response.choices[0].message.content
-
-            key_point = openai.chat.completions.create(
-                model= 'gpt-4-1106-preview', #'gpt-3.5-turbo-instruct', #'text-davinci-003',
-                temperature=0.1,
-                messages=[
-                    {
-                    "role": "system",
-                    "content": "You are a good keyword finder, and you only output 1 keypoint. You have to think step by step. What the context is the most important. You only output up to 5 words." # The symbol '+' in the middle of each keyword represents a separation. You can output up to 5 words"
-                    },
-                    {
-                        "role": "user",
-                        "content": reply_msg.replace('\n','') + f"```question: {msg}```"
-                    }
-                    
-                ]
-                )
+            reply_msg = ChatGPT.general_response(mem)        
+            key_point = ChatGPT.key_point(reply_msg, msg)
+            # print(key_point)
             
-            print(key_point.choices[0].message.content)
-            url = search_google(key_point.choices[0].message.content + '. ' + msg, reply_msg)
+            url = search_google(f"{key_point} and {msg}")
 
             with open(f'log/{user}.txt', 'w') as f:
                 f.write(mem + reply_msg + '\n')

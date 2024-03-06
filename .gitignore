@@ -92,7 +92,7 @@ env.bak/
 venv.bak/
 log/
 *.db
-
+src/
 
 # Spyder project settings
 .spyderproject
