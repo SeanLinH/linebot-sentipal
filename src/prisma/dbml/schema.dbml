@@ -12,6 +12,7 @@ Table Mood {
   stable_score Int [not null, default: 0]
   engage Int [not null, default: 0]
   timestamp DateTime [default: `now()`, unique, not null]
+  hasResponse Response
   lastUser User
 }
 
@@ -21,6 +22,8 @@ Table Response {
   group_id String
   ai_text String [not null]
   timestamp DateTime [default: `now()`, unique, not null]
+  aim_to_mood_timestamp DateTime [unique]
+  aimTo Mood
   lastUser User
 }
 
@@ -59,6 +62,8 @@ Table User {
 Ref: Mood.user_id - User.user_id [delete: Cascade]
 
 Ref: Response.user_id - User.user_id [delete: Cascade]
+
+Ref: Response.aim_to_mood_timestamp - Mood.timestamp [delete: Set Null]
 
 Ref: UserApi.user_id - User.user_id [delete: Cascade]
 

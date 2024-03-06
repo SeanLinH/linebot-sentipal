@@ -27,6 +27,7 @@ model Mood {
   engage Int @default(0)
   timestamp DateTime @unique @default(now())
 
+  hasResponse Response?
   lastUser User? @relation(name: "LastMoodToUser")
 }
 
@@ -37,6 +38,8 @@ model Response {
   ai_text String
   timestamp DateTime @unique @default(now())
 
+  aim_to_mood_timestamp DateTime? @unique
+  aimTo Mood? @relation(fields: [aim_to_mood_timestamp], references: [timestamp], onDelete: SetNull)
   lastUser User? @relation(name: "LastResponseToUser")
 }
 
