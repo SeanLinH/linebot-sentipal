@@ -32,7 +32,17 @@ async def create_one_mood_core(db: Prisma, mood: Mood) -> Mood:
 			}
 		}
 	)
-	return moodDb
+	ans = Mood(
+		user_id    = moodDb.user_id,
+		group_id   = moodDb.group_id,
+		user_text  = moodDb.user_text,
+		user_mood  = moodDb.user_mood,
+		mood_score = moodDb.mood_score,
+		stable_score = moodDb.stable_score,
+		engage     = moodDb.engage,
+		)
+	ans.timestamp = moodDb.timestamp
+	return ans
 
 async def create_one_mood(mood: Mood) -> Mood:
 	async with Prisma() as db:

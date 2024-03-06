@@ -11,7 +11,7 @@ import json
 from dotenv import load_dotenv
 import os
 import asyncio
-from src.prisma import glog, create_one_mood, Mood, delete_user_moods, create_one_response, Response
+from src.prisma import glog, create_one_mood, Mood, delete_user_moods, create_one_response, Response, query_user_memory,clr_Green, clr_Red, clr_Yellow, clr_Off
 
 load_dotenv()
 
@@ -65,7 +65,7 @@ async def linebot() -> None:
         group = json_data["events"][0]["source"]["groupId"]
         # 取出文字的前五個字元，轉換成小寫
         reply_msg = ''
-        glog(f'{user}: {msg}')
+        glog(f'{user}: {clr_Green}{msg}{clr_Off}')
         newMood = await create_one_mood(Mood(
             user_id=user,
             group_id=group,
@@ -73,10 +73,10 @@ async def linebot() -> None:
             ))
         
         if msg[:6] == 'remove':
-            delete_user_moods(user_id=user)
+            total = await delete_user_moods(user_id=user)
             text_message = TextSendMessage(text='Your record has been cleared!')
             line_bot_api.reply_message(tk,text_message)
-            glog('cleared!!')
+            glog(f'There are {total} mood records has been deleted!')
         elif ai_msg =='/':
             # text_message = TextSendMessage(text='今天陪貓咪玩耍時，踢到桌腳🥲，我現在在檢查，等等回去時再陪你。\n我順便再抓個臭蟲，通個水管。')
             # line_bot_api.reply_message(tk,text_message)
@@ -86,6 +86,8 @@ async def linebot() -> None:
             #     ff.close()
                 
             
+            total, mem = await query_user_memory(newMood.user_id)
+            glog(f'user_id:{newMood.user_id} mem =>\n\ttotal:{clr_Yellow}{total}{clr_Off}\n\tmem:{clr_Yellow}{mem}{clr_Off}')
             # 訊息發送給 OpenAI
             response = openai.chat.completions.create(
                 model= 'gpt-4-1106-preview', #'gpt-3.5-turbo-instruct', #'text-davinci-003',
@@ -97,7 +99,7 @@ async def linebot() -> None:
                     },
                     {
                         "role": "user",
-                        "content": mem.replace('\n','')
+                        "content": mem
                     }  
                 ]
                 )
@@ -124,13 +126,13 @@ async def linebot() -> None:
             glog(key_point.choices[0].message.content)
             url = search_google(key_point.choices[0].message.content + '. ' + msg, reply_msg)
 
-            create_one_response(Response(user_id=user, group_id=group,ai_text=reply_msg),aimTo=newMood)
+            await create_one_response(Response(user_id=user, group_id=group,ai_text=reply_msg),aimTo=newMood)
 
             text_message = TextSendMessage(text=reply_msg + url)
             line_bot_api.reply_message(tk,text_message)
         
     except Exception as e:
-        glog(e)
+        glog(f"{clr_Red}{e}{clr_Off}")
 
 if __name__ == "__main__":
     # run_with_ngrok(app)   # colab 使用，本機環境請刪除

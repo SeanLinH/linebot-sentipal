@@ -18,7 +18,11 @@ async def create_one_response_core(db: Prisma, response: Response, aimTo: Mood) 
 			},
 			'group_id': response.group_id,
 			'ai_text': response.ai_text,
-			'aim_to_mood_timestamp': aim_to_mood_timestamp,
+			'aimTo': {
+				'connect': {
+					'timestamp': aim_to_mood_timestamp,
+				}
+			},
 			'lastUser': {
 				'connect': {
 					'user_id': response.user_id
@@ -26,7 +30,14 @@ async def create_one_response_core(db: Prisma, response: Response, aimTo: Mood) 
 			}
 		}
 	)
-	return responseDb
+	ans = Response(
+		user_id    = responseDb.user_id,
+		group_id   = responseDb.group_id,
+		ai_text    = responseDb.ai_text,
+		aim_to_mood_timestamp = responseDb.aim_to_mood_timestamp
+		)
+	ans.timestamp = responseDb.timestamp
+	return ans
 
 async def create_one_response(response: Response, aimTo: Mood) -> Response:
 	async with Prisma() as db:

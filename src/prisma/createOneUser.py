@@ -10,7 +10,13 @@ async def create_one_user_core(db:Prisma, user: User) -> User:
 			'user_role': 'general'
 		}
 	)
-	return newUser
+	return User(
+		user_id    = newUser.user_id,
+		user_role  = newUser.user_role,
+		summary    = newUser.summary,
+		lastmood_timestamp = newUser.lastmood_timestamp,
+		lastresponse_timestamp = newUser.lastresponse_timestamp,
+		)
 
 async def create_one_user(user: User) -> User:
 	async with Prisma() as db:
