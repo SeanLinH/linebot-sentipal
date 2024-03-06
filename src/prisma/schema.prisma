@@ -68,7 +68,7 @@ model GroupApi {
 model User {
   user_id String @id
   // user_role UserApiRole
-  user_role String
+  user_role String @default("general")
   summary String?
   
   lastmood_timestamp DateTime? @unique
