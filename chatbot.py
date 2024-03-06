@@ -41,6 +41,7 @@ def search_google(query, reply_msg):
 
 app = Flask(__name__)
 @app.route("/", methods=['POST'])
+
 def linebot_endpont():
     asyncio.run(linebot())
     return 'OK'
