@@ -48,7 +48,13 @@ def linebot_endpont():
 async def linebot() -> None:
     body = request.get_data(as_text=True)
     json_data = json.loads(body)
-    glog(json_data)
+    if json_data.get("events") == None:
+        glog('{clr_Red}Not accept data format (1){clr_Off}')
+        return
+    if len(json_data['events']) == 0:
+        glog('{clr_Red}Not accept data format (2){clr_Off}')
+        return
+    # glog(json_data)
     API_KEY = os.getenv("OPENAI_API_KEY")
     LINE_BOT_KEY = os.getenv("LINEBOT_KEY")
     LINE_SECRET_KEY = os.getenv("LINE_SECRET_KEY")
@@ -62,7 +68,7 @@ async def linebot() -> None:
         msg = json_data['events'][0]['message']['text'] + '.'
         ai_msg = msg[:1]
         user = json_data["events"][0]["source"]["userId"]
-        group = json_data["events"][0]["source"]["groupId"]
+        group = json_data["events"][0]["source"].get("groupId")
         # 取出文字的前五個字元，轉換成小寫
         reply_msg = ''
         glog(f'{user}: {clr_Green}{msg}{clr_Off}')

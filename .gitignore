@@ -114,3 +114,4 @@ src/
 *.pdf
 *.csv
 
+node_modules/
