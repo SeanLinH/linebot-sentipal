@@ -5,22 +5,25 @@
 Table Mood {
   user_id String [not null]
   user User [not null]
-  group_id String [not null]
+  group_id String
   user_text String [not null]
-  user_mood String [not null]
-  mood_score Int [not null]
-  stable_score Int [not null]
-  engage Int [not null]
-  timestamp DateTime [unique, not null]
+  user_mood String
+  mood_score Int [not null, default: 0]
+  stable_score Int [not null, default: 0]
+  engage Int [not null, default: 0]
+  timestamp DateTime [default: `now()`, unique, not null]
+  hasResponse Response
   lastUser User
 }
 
 Table Response {
   user_id String
   user User
-  group_id String [not null]
+  group_id String
   ai_text String [not null]
-  timestamp DateTime [unique, not null]
+  timestamp DateTime [default: `now()`, unique, not null]
+  aim_to_mood_timestamp DateTime [unique]
+  aimTo Mood
   lastUser User
 }
 
@@ -28,7 +31,7 @@ Table UserApi {
   user_id String [unique, not null]
   user User [not null]
   user_api String [not null]
-  timestamp DateTime [not null]
+  timestamp DateTime [default: `now()`, not null]
   group_ids Group [not null]
 }
 
@@ -45,7 +48,7 @@ Table GroupApi {
 
 Table User {
   user_id String [pk]
-  user_role String [not null]
+  user_role String [not null, default: 'general']
   summary String
   lastmood_timestamp DateTime [unique]
   lastmood Mood
@@ -59,6 +62,8 @@ Table User {
 Ref: Mood.user_id - User.user_id [delete: Cascade]
 
 Ref: Response.user_id - User.user_id [delete: Cascade]
+
+Ref: Response.aim_to_mood_timestamp - Mood.timestamp [delete: Set Null]
 
 Ref: UserApi.user_id - User.user_id [delete: Cascade]
 

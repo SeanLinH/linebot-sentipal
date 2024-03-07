@@ -9,7 +9,9 @@ from linebot import LineBotApi, WebhookHandler
 from linebot.models import TextSendMessage   # 載入 TextSendMessage 模組
 import json
 from dotenv import load_dotenv
-import os 
+import os
+import asyncio
+from src.prisma import glog, create_one_mood, Mood, delete_user_moods, create_one_response, Response, query_user_memory,clr_Green, clr_Red, clr_Yellow, clr_Off
 
 load_dotenv()
 
@@ -39,10 +41,14 @@ def search_google(query, reply_msg):
 
 app = Flask(__name__)
 @app.route("/", methods=['POST'])
-def linebot():
+def linebot_endpont():
+    asyncio.run(linebot())
+    return 'OK'
+
+async def linebot() -> None:
     body = request.get_data(as_text=True)
     json_data = json.loads(body)
-    print(json_data)
+    glog(json_data)
     API_KEY = os.getenv("OPENAI_API_KEY")
     LINE_BOT_KEY = os.getenv("LINEBOT_KEY")
     LINE_SECRET_KEY = os.getenv("LINE_SECRET_KEY")
@@ -56,29 +62,21 @@ def linebot():
         msg = json_data['events'][0]['message']['text'] + '.'
         ai_msg = msg[:1]
         user = json_data["events"][0]["source"]["userId"]
+        group = json_data["events"][0]["source"]["groupId"]
         # 取出文字的前五個字元，轉換成小寫
         reply_msg = ''
-        print(f'{user}: {msg}')
-        with open(f'log/{user}.txt', 'a') as f:
-            f.write(msg)
-            if ai_msg == '/':
-                f.write('####')
-            f.close()
-        
-        mem = open(f'log/{user}.txt', 'r').read()
-
-        if len(mem) > 2000:
-            with open(f'log/{user}.txt', 'w') as f:
-                f.write(mem[-2000:])
-                f.close()
-            mem = mem[-2000:]
-
+        glog(f'{user}: {clr_Green}{msg}{clr_Off}')
+        newMood = await create_one_mood(Mood(
+            user_id=user,
+            group_id=group,
+            user_text=msg
+            ))
         
         if msg[:6] == 'remove':
-            open(f'log/{user}.txt', 'w').write("")
+            total = await delete_user_moods(user_id=user)
             text_message = TextSendMessage(text='Your record has been cleared!')
             line_bot_api.reply_message(tk,text_message)
-            print('cleared!!')
+            glog(f'There are {total} mood records has been deleted!')
         elif ai_msg =='/':
             # text_message = TextSendMessage(text='今天陪貓咪玩耍時，踢到桌腳🥲，我現在在檢查，等等回去時再陪你。\n我順便再抓個臭蟲，通個水管。')
             # line_bot_api.reply_message(tk,text_message)
@@ -88,6 +86,8 @@ def linebot():
             #     ff.close()
                 
             
+            total, mem = await query_user_memory(newMood.user_id)
+            glog(f'user_id:{newMood.user_id} mem =>\n\ttotal:{clr_Yellow}{total}{clr_Off}\n\tmem:{clr_Yellow}{mem}{clr_Off}')
             # 訊息發送給 OpenAI
             response = openai.chat.completions.create(
                 model= 'gpt-4-1106-preview', #'gpt-3.5-turbo-instruct', #'text-davinci-003',
@@ -99,17 +99,11 @@ def linebot():
                     },
                     {
                         "role": "user",
-                        "content": mem.replace('\n','')
+                        "content": mem
                     }  
                 ]
                 )
             
-            with open(f'log/record.txt', 'a') as ff:
-                ff.write(msg + '\n')
-                ff.close()
-
-            
-
             # 接收到回覆訊息後，移除換行符號
             reply_msg = response.choices[0].message.content
 
@@ -129,19 +123,16 @@ def linebot():
                 ]
                 )
             
-            print(key_point.choices[0].message.content)
+            glog(key_point.choices[0].message.content)
             url = search_google(key_point.choices[0].message.content + '. ' + msg, reply_msg)
 
-            with open(f'log/{user}.txt', 'w') as f:
-                f.write(mem + reply_msg + '\n')
-                f.close()
+            await create_one_response(Response(user_id=user, group_id=group,ai_text=reply_msg),aimTo=newMood)
 
             text_message = TextSendMessage(text=reply_msg + url)
             line_bot_api.reply_message(tk,text_message)
         
     except Exception as e:
-        print(e)
-    return 'OK'
+        glog(f"{clr_Red}{e}{clr_Off}")
 
 if __name__ == "__main__":
     # run_with_ngrok(app)   # colab 使用，本機環境請刪除
