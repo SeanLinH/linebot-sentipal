@@ -6,4 +6,5 @@ langchain
 python-dotenv
 torch 
 transformers
+prisma
 tqdm
