@@ -1,4 +1,3 @@
-
 import openai
 import requests
 # from flask_ngrok import run_with_ngrok   # colab 使用，本機環境請刪除
@@ -12,6 +11,9 @@ from dotenv import load_dotenv
 import os 
 from api import ChatGPT
 from api.huggingface import Models
+import sql
+
+
 
 load_dotenv()
 
@@ -47,21 +49,32 @@ def linebot():
     API_KEY = os.getenv("OPENAI_API_KEY")
     LINE_BOT_KEY = os.getenv("LINEBOT_KEY")
     LINE_SECRET_KEY = os.getenv("LINE_SECRET_KEY")
+    
     try:
+        
         openai.api_key = API_KEY
         line_bot_api = LineBotApi(LINE_BOT_KEY)
         handler = WebhookHandler(LINE_SECRET_KEY)
         signature = request.headers['X-Line-Signature']
         handler.handle(body, signature)
-        tk = json_data['events'][0]['replyToken']
+        
+        tk = json_data['events'][0]['replyToken'] # user reply token
         msg = json_data['events'][0]['message']['text'] + '.'
         user = json_data["events"][0]["source"]["userId"]
         group = json_data["events"][0]['source'].get('groupId')
+
+        ## 儲存 mood
         hf = Models(msg)
-        mood = hf.go_emotion()
-        mood_score = hf.detect_depression()
+        mood = hf.go_emotion() # mood classification
+        mood_score = hf.detect_depression() 
+        mood_score = int(mood_score[0][0]['label'][-1]) # detect depression
         
-        print(mood[0][0]['label'], mood_score[0][0]['label'])
+
+        
+        
+        
+
+
         
         ai_msg = msg[:1] #啟動咒語
         

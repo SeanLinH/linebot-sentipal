@@ -55,6 +55,10 @@ class Mood:
             print("Insert Failed")
             print(e)
         conn.close()
+    def fetch_group_memory(self):
+        conn = sqlite3.connect('src/db/database.db')
+        c = conn.cursor()
+        c.execute(f"SELECT user_text FROM users WHERE name = ?", ())
         
 
 class AIresponse:
