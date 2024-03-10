@@ -11,7 +11,7 @@ import json
 from dotenv import load_dotenv
 import os
 import asyncio
-from src.prisma import glog, create_one_mood, Mood, delete_user_moods, create_one_response, Response, query_user_memory, query_group_memory, update_one_user, clr_Green, clr_Red, clr_Yellow, clr_Off
+from src.prisma import glog, create_one_mood, Mood, delete_user_moods, create_one_response, Response, query_user_memory, query_group_memory, update_one_user, register_user_api, clr_Green, clr_Red, clr_Yellow, clr_Off
 from api.huggingface import Models
 from api.LangchainGPT import Router, computeMoodScore, report
 from api import prompts, ChatGPT
@@ -132,9 +132,9 @@ async def linebot() -> None:
         elif msg[:2] == '註冊':
             """更新user api"""
             API_KEY = msg[3:]
+            register_user_api(user, API_KEY)
             ext_message = TextSendMessage(text='註冊') ## 測試回覆
             line_bot_api.reply_message(tk,text_message)
-            pass ## 嘉文
             
         elif msg[:7] == 'summary':
             if group == None:

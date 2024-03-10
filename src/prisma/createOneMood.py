@@ -2,8 +2,11 @@ import asyncio
 from prisma import Prisma
 from src.prisma.mood import Mood
 from src.prisma.user import User
+from src.prisma.group import Group
 from src.prisma.findOneUser import find_one_user_core
+from src.prisma.findOneGroup import find_one_group_core
 from src.prisma.createOneUser import create_one_user_core
+from src.prisma.createOneGroup import create_one_group_core
 from src.prisma.util import glog
 from api.huggingface import Models
 
@@ -17,6 +20,12 @@ async def create_one_mood_core(db: Prisma, mood: Mood) -> Mood:
 	if userDb == None:
 		newUser = User(user_id=mood.user_id)
 		userDb = await create_one_user_core(db, newUser)
+
+	if mood.group_id != None:
+		groupDb = await find_one_group_core(db, mood.group_id)
+		if groupDb == None:
+			newGroup = Group(group_id=mood.group_id, groupUsers=[User(user_id=mood.user_id)])
+			groupDb = await create_one_group_core(db, newGroup)
 
 	moodDb = await db.mood.create(
 		data = {
