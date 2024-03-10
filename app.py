@@ -157,7 +157,7 @@ async def linebot() -> None:
         elif msg[0] =='/':
             # 訊息發送給 OpenAI
             print('啟動咒語...')
-            reply_msg = Router(msg)
+            reply_msg = Router(mem)
             
             key_point = ChatGPT.key_point(reply_msg, msg)
             

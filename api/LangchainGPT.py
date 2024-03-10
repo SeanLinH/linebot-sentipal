@@ -22,7 +22,7 @@ from api import prompts
 
 load_dotenv()
 openai.api_key = os.environ.get("OPENAI_API_KEY")
-llm = ChatOpenAI(temperature=0.3, model="gpt-4-0125-preview",api_key=os.environ.get("OPENAI_API_KEY"))
+llm = ChatOpenAI(temperature=0.7, model="gpt-4-0125-preview",api_key=os.environ.get("OPENAI_API_KEY"))
 
 """
 1. Requirement
