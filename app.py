@@ -13,7 +13,7 @@ import os
 import asyncio
 from src.prisma import glog, create_one_mood, Mood, delete_user_moods, create_one_response, Response, query_user_memory, query_group_memory, clr_Green, clr_Red, clr_Yellow, clr_Off
 from api.huggingface import Models
-from api.LangchainGPT import Router, computeMoodScore
+from api.LangchainGPT import Router, computeMoodScore, report
 from api import prompts, ChatGPT
 
 
@@ -85,14 +85,24 @@ async def linebot() -> None:
         user_mood = hf.go_emotion() # mood classification
         sentiment = hf.postive_or_negative()
         mood_score = hf.detect_depression()
-        statble_score = 0
+        # statble_score = 0
     
 
+        newMood = await create_one_mood(Mood(
+            user_id=user,
+            group_id=group,
+            user_text=msg,
+            user_mood=user_mood,
+            mood_score=mood_score,
+            # stable_score= statble_score
+            ))
+
+        profile = line_bot_api.get_profile(user)
         
         if group == None:
-            total, mem = await query_user_memory(newMood.user_id)
+            total, mem = await query_user_memory(newMood.user_id, days=7)
         else:
-            total, mem = await query_group_memory(newMood.group_id)
+            total, mem = await query_group_memory(newMood.user_id, newMood.group_id, days=7)
         glog(f'user_id:{newMood.user_id} mem =>\n\ttotal:{clr_Yellow}{total}{clr_Off}\n\tmem:{clr_Yellow}{mem}{clr_Off}')
         
         # if mood_score == 1:
@@ -100,38 +110,43 @@ async def linebot() -> None:
         #     statble_score = int(computeMoodScore(mem, user_mood, sentiment, mood_score))
              
         
-        newMood = await create_one_mood(Mood(
-            user_id=user,
-            group_id=group,
-            user_text=msg,
-            user_mood=user_mood,
-            mood_score=mood_score,
-            stable_score= statble_score
-            ))
         
         
-        if msg in ['/caregiver', '/case', '/general']:
+        
+        if msg in ['caregiver', 'case', 'general']:
             """Update user的 role 角色"""
+            
+            ext_message = TextSendMessage(text='role') ## 測試回覆
+            line_bot_api.reply_message(tk,text_message)
+            
             pass ## 嘉文
 
-        elif msg[:3] == '/註冊':
+        elif msg[:2] == '註冊':
             """更新user api"""
             API_KEY = msg[3:]
+            ext_message = TextSendMessage(text='註冊') ## 測試回覆
+            line_bot_api.reply_message(tk,text_message)
             pass ## 嘉文
             
-        elif msg[:8] == '/summary':
+        elif msg[:7] == 'summary':
             if group == None:
-                total, mem = await query_user_memory(newMood.user_id)
+                total, mem = await query_user_memory(newMood.user_id, days=7)
             else:
-                total, mem = await query_group_memory(newMood.group_id)
+                total, mem = await query_group_memory(newMood.user_id, newMood.group_id, days=7)
             glog(f'user_id:{newMood.user_id} mem =>\n\ttotal:{clr_Yellow}{total}{clr_Off}\n\tmem:{clr_Yellow}{mem}{clr_Off}')
             
+            text_message = TextSendMessage(text='summary') ## 測試回覆
+            line_bot_api.reply_message(tk,text_message)
             
-        elif msg[:3] == '/報告':
+            
+        elif msg[:4] == '心情報告':
             """Langchain 方式來做"""
+            response = report(mem)
+            text_message = TextSendMessage(text=f'Hello! {profile.display_name}你好！\n以下是你的心情報告\n\n{response}\nhttps://drive.google.com/file/d/1_8hH-UMOpyW0rOAuRbWi0bXBoN3oQRAZ/view')
+            line_bot_api.reply_message(tk,text_message)
             pass
             
-        elif msg[:6] == '/remove':
+        elif msg[:6] == 'remove':
             total = await delete_user_moods(user_id=user)
             text_message = TextSendMessage(text='Your record has been cleared!')
             line_bot_api.reply_message(tk,text_message)
@@ -142,13 +157,15 @@ async def linebot() -> None:
         elif msg[0] =='/':
             # 訊息發送給 OpenAI
             print('啟動咒語...')
-            reply_msg = TextSendMessage(text=Router(msg))
-            key_point = ChatGPT.key_point(f'{reply_msg} \n ```question: {msg}```')
+            reply_msg = Router(msg)
+            
+            key_point = ChatGPT.key_point(reply_msg, msg)
             
             glog(key_point)
             url = search_google(key_point + '. ' + msg, reply_msg)
             await create_one_response(Response(user_id=user, group_id=group, ai_text=reply_msg),aimTo=newMood)
-            text_message = TextSendMessage(text=reply_msg + url)
+            
+            text_message = TextSendMessage(text=f'{reply_msg} {url}')
             line_bot_api.reply_message(tk,text_message)
         
     except Exception as e:
