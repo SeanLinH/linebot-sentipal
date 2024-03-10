@@ -79,14 +79,14 @@ async def linebot() -> None:
         reply_msg = ''
         glog(f'{user}: {clr_Green}{msg}{clr_Off}')
 
-        
+        print('huggingface....')
         hf = Models(msg)
         hf = Models(hf.translate())
         user_mood = hf.go_emotion() # mood classification
         sentiment = hf.postive_or_negative()
         mood_score = hf.detect_depression()
         statble_score = 0
-       
+    
 
         
         if group == None:
@@ -141,12 +141,13 @@ async def linebot() -> None:
         
         elif msg[0] =='/':
             # 訊息發送給 OpenAI
+            print('啟動咒語...')
             reply_msg = TextSendMessage(text=Router(msg))
             key_point = ChatGPT.key_point(f'{reply_msg} \n ```question: {msg}```')
             
             glog(key_point)
             url = search_google(key_point + '. ' + msg, reply_msg)
-            await create_one_response(Response(user_id=user, group_id=group,ai_text=reply_msg),aimTo=newMood)
+            await create_one_response(Response(user_id=user, group_id=group, ai_text=reply_msg),aimTo=newMood)
             text_message = TextSendMessage(text=reply_msg + url)
             line_bot_api.reply_message(tk,text_message)
         

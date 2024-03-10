@@ -38,6 +38,7 @@ class Models:
             print(output[0][0].get('label'))
             return self.det_lab.get(output[0][0].get('label'))
         except:
+            print("reconnect detect_depression")
             time.sleep(20)
             return self.detect_depression()
 
@@ -58,6 +59,7 @@ class Models:
             print(output[0][0].get('label'))
             return output[0][0].get('label')
         except:
+            print("reconnect go_emotion")
             time.sleep(20)
             return self.go_emotion()
 
@@ -78,6 +80,7 @@ class Models:
             print(output[0].get('translation_text'))
             return output[0].get('translation_text')
         except:
+            print("reconnect translate")
             time.sleep(20)
             return self.translate()
     
@@ -99,6 +102,7 @@ class Models:
             print(output.get('labels')[0])
             return output.get('labels')[0]
         except:
+            print("reconnect classifer")
             time.sleep(20)
             return self.classifer()
             
@@ -106,7 +110,7 @@ class Models:
     
     def postive_or_negative(self):
         """mood_score  [-1, 0, 1]"""
-        API_URL = "https://api-inference.huggingface.co/models/mrm8488/distilroberta-finetuned-financial-news-ㄉ-analysis"
+        API_URL = "https://api-inference.huggingface.co/models/mrm8488/distilroberta-finetuned-financial-news-sentiment-analysis"
         headers = {"Authorization": f"Bearer {HF_KEY}"}
         
         
@@ -122,6 +126,7 @@ class Models:
             print(output[0][0].get('label'))
             return output[0][0].get('label')
         except:
+            print("reconnect postive_or_negative")
             time.sleep(20)
             return self.postive_or_negative()
 
