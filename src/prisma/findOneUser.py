@@ -3,6 +3,10 @@ from prisma import Prisma
 from src.prisma.user import User
 from src.prisma.util import glog
 
+"""
+find userId in [Users] or not
+"""
+
 async def find_one_user_core(db: Prisma, userId: str) -> User:
 	bingo = await db.user.find_unique(
 			where={

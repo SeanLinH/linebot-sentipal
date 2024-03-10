@@ -6,6 +6,7 @@ from src.prisma.deleteUserMoods import delete_user_moods
 from src.prisma.findOneUser import find_one_user
 from src.prisma.mood import Mood
 from src.prisma.queryUserMemory import query_user_memory
+from src.prisma.queryGroupMemory import query_group_memory
 from src.prisma.response import Response
 from src.prisma.user import User
 from src.prisma.userApi import UserApi

@@ -5,6 +5,11 @@ from src.prisma.mood import Mood
 from src.prisma.user import User
 from src.prisma.util import glog
 
+
+"""
+AI response insert to [Response]
+"""
+
 async def create_one_response_core(db: Prisma, response: Response, aimTo: Mood) -> Response:
 	aim_to_mood_timestamp = None
 	if aimTo != None:
