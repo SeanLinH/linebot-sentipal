@@ -4,6 +4,7 @@ from src.prisma.createOneResponse import create_one_response
 from src.prisma.createOneUser import create_one_user
 from src.prisma.deleteUserMoods import delete_user_moods
 from src.prisma.findOneUser import find_one_user
+from src.prisma.updateOneUser import update_one_user
 from src.prisma.mood import Mood
 from src.prisma.queryUserMemory import query_user_memory
 from src.prisma.queryGroupMemory import query_group_memory

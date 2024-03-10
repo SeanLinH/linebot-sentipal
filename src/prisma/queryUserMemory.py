@@ -3,7 +3,7 @@ from prisma import Prisma
 from datetime import datetime, timedelta
 from src.prisma.util import glog, clr_Yellow, clr_Red, clr_Off
 
-async def query_user_memory_core(db: Prisma, user_id: str, days: int) -> tuple[int, str, int]:
+async def query_user_memory_core(db: Prisma, user_id: str, days: int) -> tuple[int, str]:
 	moods = await db.mood.find_many(
 		skip=0,
 		take=2000,
@@ -24,7 +24,7 @@ async def query_user_memory_core(db: Prisma, user_id: str, days: int) -> tuple[i
 		ans += "\n"
 	return len(moods), ans
 
-async def query_user_memory(user_id: str, days: int) -> tuple[int, str, int]:
+async def query_user_memory(user_id: str, days: int) -> tuple[int, str]:
 	async with Prisma() as db:
 		return await query_user_memory_core(db, user_id, days=7)
 

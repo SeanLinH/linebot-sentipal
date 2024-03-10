@@ -21,7 +21,7 @@ model Mood {
   group_id String?
   user_text String
 //   user_mood Json
-  user_mood String?
+  user_mood String @default("neutial")
   mood_score Int @default(0)
   stable_score Int @default(0)
   engage Int @default(0)
@@ -65,7 +65,7 @@ model GroupApi {
 // enum UserApiRole {
 //   general
 //   case
-//   assistant
+//   caregiver
 // }
 
 model User {

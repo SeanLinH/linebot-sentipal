@@ -11,7 +11,7 @@ import json
 from dotenv import load_dotenv
 import os
 import asyncio
-from src.prisma import glog, create_one_mood, Mood, delete_user_moods, create_one_response, Response, query_user_memory, query_group_memory, clr_Green, clr_Red, clr_Yellow, clr_Off
+from src.prisma import glog, create_one_mood, Mood, delete_user_moods, create_one_response, Response, query_user_memory, query_group_memory, update_one_user, clr_Green, clr_Red, clr_Yellow, clr_Off
 from api.huggingface import Models
 from api.LangchainGPT import Router, computeMoodScore
 from api import prompts, ChatGPT
@@ -112,7 +112,12 @@ async def linebot() -> None:
         
         if msg in ['/caregiver', '/case', '/general']:
             """Update user的 role 角色"""
-            pass ## 嘉文
+            await update_one_user(
+                user_id=user,
+                data={
+                    'user_role': msg[1:]
+                }
+            )
 
         elif msg[:3] == '/註冊':
             """更新user api"""
