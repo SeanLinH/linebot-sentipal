@@ -12,8 +12,21 @@ from dotenv import load_dotenv
 import os
 import asyncio
 from src.prisma import glog, create_one_mood, Mood, delete_user_moods, create_one_response, Response, query_user_memory,clr_Green, clr_Red, clr_Yellow, clr_Off
+from api.huggingface import Models
+from api.LangchainGPT import Router
+
 
 load_dotenv()
+
+## LangChain import 
+# from langchain.output_parsers import ResponseSchema
+# from langchain.output_parsers import StructuredOutputParser
+# from langchain_openai import ChatOpenAI
+# from langchain.chains import ConversationChain
+# from langchain.memory import (ConversationBufferMemory, 
+#                                 ConversationBufferWindowMemory, 
+#                                 ConversationSummaryBufferMemory)
+
 
 
 # search something from google
@@ -37,6 +50,7 @@ def search_google(query, reply_msg):
     elif str(response) == "<Response [429]>":
         return '\n\n我累了🥵, 休息一下喝口水'
     return '\n\n幫你找找:' + text
+
 
 
 app = Flask(__name__)
@@ -65,22 +79,30 @@ async def linebot() -> None:
         signature = request.headers['X-Line-Signature']
         handler.handle(body, signature)
         tk = json_data['events'][0]['replyToken']
-        msg = json_data['events'][0]['message']['text'] + '.'
+        msg = json_data['events'][0]['message'].get('text') + '\n'
         ai_msg = msg[:1]
         user = json_data["events"][0]["source"]["userId"]
         group = json_data["events"][0]["source"].get("groupId")
         # 取出文字的前五個字元，轉換成小寫
         reply_msg = ''
         glog(f'{user}: {clr_Green}{msg}{clr_Off}')
+        
         newMood = await create_one_mood(Mood(
             user_id=user,
             group_id=group,
             user_text=msg
             ))
         
+        profile = line_bot_api.get_profile(user)
+    
+        # print(f'\n\n{profile["displayName"]}\n\n')
+        # text_message = TextSendMessage(text=Router(msg))
+        # line_bot_api.reply_message(tk,text_message)
+
+
         if msg[:6] == 'remove':
             total = await delete_user_moods(user_id=user)
-            text_message = TextSendMessage(text='Your record has been cleared!')
+            text_message = TextSendMessage(text=f'{profile.display_name} Your record has been cleared!')
             line_bot_api.reply_message(tk,text_message)
             glog(f'There are {total} mood records has been deleted!')
         elif ai_msg =='/':
@@ -92,7 +114,7 @@ async def linebot() -> None:
             #     ff.close()
                 
             
-            total, mem = await query_user_memory(newMood.user_id)
+            total, mem = await query_user_memory(newMood.user_id, 7)
             glog(f'user_id:{newMood.user_id} mem =>\n\ttotal:{clr_Yellow}{total}{clr_Off}\n\tmem:{clr_Yellow}{mem}{clr_Off}')
             # 訊息發送給 OpenAI
             response = openai.chat.completions.create(
