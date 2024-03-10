@@ -1,7 +1,7 @@
 import asyncio
 from prisma import Prisma
 from datetime import datetime, timedelta
-from src.prisma.util import glog, clr_Yellow, clr_Red, clr_Off
+from src.prisma.util import glog, appendLF, clr_Yellow, clr_Red, clr_Off
 
 async def query_group_memory_core(db: Prisma, group_id: str, user_id: str, includeResponse: bool, days: int) -> tuple[int, str]:
 	if user_id == None:
@@ -40,10 +40,18 @@ async def query_group_memory_core(db: Prisma, group_id: str, user_id: str, inclu
 			userIndex = len(user_ids)
 		else:
 			userIndex = user_ids.index(mood.user_id)
-		ans += f"用戶{userIndex}: {mood.user_text}\n"
-		lineCount += 1
-		if includeResponse and mood.hasResponse != None:
-			ans += f"SentiPal: {mood.hasResponse.ai_text}\n"
+		
+		if includeResponse:
+			ans += f"用戶{userIndex}: {mood.user_text}"
+			ans = appendLF(ans)
+			lineCount += 1
+			if mood.hasResponse != None:
+				ans += f"SentiPal: {mood.hasResponse.ai_text}"
+				ans = appendLF(ans)
+				lineCount += 1
+		else:
+			ans += f"{mood.user_text}"
+			ans = appendLF(ans)
 			lineCount += 1
 	return lineCount, ans
 

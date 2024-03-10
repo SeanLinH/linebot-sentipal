@@ -11,4 +11,4 @@ from src.prisma.queryGroupMemory import query_group_memory
 from src.prisma.response import Response
 from src.prisma.user import User
 from src.prisma.userApi import UserApi
-from src.prisma.util import glog, clr_Off, clr_Black, clr_Red, clr_Green, clr_Yellow, clr_Blue, clr_Purple, clr_Cyan, clr_White
+from src.prisma.util import glog, appendLF, clr_Off, clr_Black, clr_Red, clr_Green, clr_Yellow, clr_Blue, clr_Purple, clr_Cyan, clr_White

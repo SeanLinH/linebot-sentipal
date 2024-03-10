@@ -101,9 +101,14 @@ async def linebot() -> None:
         
         if group == None:
             total, mem = await query_user_memory(newMood.user_id, days=7)
+            glog(f'{clr_Yellow}User memory ...{clr_Off}\n\tuser_id:{newMood.user_id} mem =>\n\ttotal:{clr_Yellow}{total}{clr_Off}\n\tmem:{clr_Yellow}{mem}{clr_Off}')
         else:
-            total, mem = await query_group_memory(newMood.user_id, newMood.group_id, days=7)
-        glog(f'user_id:{newMood.user_id} mem =>\n\ttotal:{clr_Yellow}{total}{clr_Off}\n\tmem:{clr_Yellow}{mem}{clr_Off}')
+            total, mem = await query_group_memory(
+                group_id=newMood.group_id, 
+                user_id=newMood.user_id, 
+                includeResponse=False,
+                days=7)
+            glog(f'{clr_Yellow}Group memory ...{clr_Off}\n\tgroup_id:{newMood.group_id} mem =>\n\ttotal:{clr_Yellow}{total}{clr_Off}\n\tmem:{clr_Yellow}{mem}{clr_Off}')
         
         # if mood_score == 1:
         #     factor = hf.classifer('individual', 'relationship', 'community interact', 'society culture')

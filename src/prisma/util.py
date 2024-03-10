@@ -29,4 +29,9 @@ def nowTimeStampISO() -> str:
 	# print(f"nowTimeStampISO => {iso_date2}")
 	return iso_date2
 
+def appendLF(a:str) -> str:
+	if a[-1] != '\n':
+		return a + '\n'
+	return a
+
 # nowTimeStampISO()

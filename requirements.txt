@@ -4,7 +4,10 @@ requests
 line-bot-sdk
 langchain
 python-dotenv
-torch 
+torch
 transformers
 prisma
 tqdm
+langchain-core
+langchain-community
+langchain-openai
