@@ -79,7 +79,7 @@ async def linebot() -> None:
         reply_msg = ''
         glog(f'{user}: {clr_Green}{msg}{clr_Off}')
 
-        print('huggingface....')
+        glog('huggingface....')
         hf = Models(msg)
         hf = Models(hf.translate())
         user_mood = hf.go_emotion() # mood classification
@@ -113,24 +113,24 @@ async def linebot() -> None:
         # if mood_score == 1:
         #     factor = hf.classifer('individual', 'relationship', 'community interact', 'society culture')
         #     statble_score = int(computeMoodScore(mem, user_mood, sentiment, mood_score))
-             
         
         
         
-        
-        if msg in ['caregiver', 'case', 'general']:
+        if msg in ['/caregiver', '/case', '/general']:
             """Update user的 role 角色"""
+            glog('設定角色')
             await update_one_user(
                 user_id=user,
                 data={
-                    'user_role': msg[1:]
+                    'user_role': msg
                 }
             )
-            ext_message = TextSendMessage(text='role') ## 測試回覆
+            text_message = TextSendMessage(text='role') ## 測試回覆
             line_bot_api.reply_message(tk,text_message)
 
-        elif msg[:2] == '註冊':
+        elif msg[:3] == '/註冊':
             """更新user api"""
+            glog('註冊...')
             API_KEY = msg[3:]
             register_user_api(user, API_KEY)
             ext_message = TextSendMessage(text='註冊') ## 測試回覆
@@ -164,8 +164,8 @@ async def linebot() -> None:
         
         elif msg[0] =='/':
             # 訊息發送給 OpenAI
-            print('啟動咒語...')
-            reply_msg = Router(mem)
+            glog('啟動咒語...')
+            reply_msg = Router(msg)  #f'My history conversation:{mem}\nMy question:```{msg}```')
             
             key_point = ChatGPT.key_point(reply_msg, msg)
             
