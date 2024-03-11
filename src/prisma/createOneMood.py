@@ -22,7 +22,7 @@ async def create_one_mood_core(db: Prisma, mood: Mood) -> Mood:
 		userDb = await create_one_user_core(db, newUser)
 
 	if mood.group_id != None:
-		groupDb = await find_one_group_core(db, mood.group_id)
+		groupDb = await find_one_group_core(db, mood.group_id, False)
 		if groupDb == None:
 			newGroup = Group(group_id=mood.group_id, groupUsers=[User(user_id=mood.user_id)])
 			groupDb = await create_one_group_core(db, newGroup)
