@@ -21,8 +21,8 @@ async def find_one_group_core(db: Prisma, groupId: str, includeGroupUsers: bool)
 	if bingo == None:
 		return None
 	
+	groupUsers = []
 	if includeGroupUsers:
-		groupUsers = []
 		for e in bingo.groupUsers:
 			groupUsers.append(User(
 				user_id=e.user_id, 

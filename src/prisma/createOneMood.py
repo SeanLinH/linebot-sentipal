@@ -7,6 +7,7 @@ from src.prisma.findOneUser import find_one_user_core
 from src.prisma.findOneGroup import find_one_group_core
 from src.prisma.createOneUser import create_one_user_core
 from src.prisma.createOneGroup import create_one_group_core
+from src.prisma.updateOneGroup import update_one_group_core
 from src.prisma.util import glog
 from api.huggingface import Models
 
@@ -22,11 +23,26 @@ async def create_one_mood_core(db: Prisma, mood: Mood) -> Mood:
 		userDb = await create_one_user_core(db, newUser)
 
 	if mood.group_id != None:
-		groupDb = await find_one_group_core(db, mood.group_id, False)
+		groupDb = await find_one_group_core(db, mood.group_id, True)
 		if groupDb == None:
 			newGroup = Group(group_id=mood.group_id, groupUsers=[User(user_id=mood.user_id)])
 			groupDb = await create_one_group_core(db, newGroup)
-
+		else:
+			userWasInTheGroup = False
+			for u in groupDb.groupUsers:
+				if u.user_id == mood.user_id:
+					userWasInTheGroup = True
+					break
+			if not userWasInTheGroup:
+				groupDb = await update_one_group_core(db, mood.group_id, data={
+					'groupUsers': {
+						'connect': [
+							{
+								'user_id': mood.user_id
+							}
+						]
+					}
+				})
 	moodDb = await db.mood.create(
 		data = {
 			'user': {

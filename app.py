@@ -55,10 +55,10 @@ async def linebot() -> None:
     body = request.get_data(as_text=True)
     json_data = json.loads(body)
     if json_data.get("events") == None:
-        glog('{clr_Red}Not accept data format (1){clr_Off}')
+        glog(f'{clr_Red}Not accept data format (1){clr_Off}')
         return
     if len(json_data['events']) == 0:
-        glog('{clr_Red}Not accept data format (2){clr_Off}')
+        glog(f'{clr_Red}Not accept data format (2){clr_Off}')
         return
     # glog(json_data)
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
