@@ -13,7 +13,7 @@ import os
 import asyncio
 from src.prisma import glog, create_one_mood, Mood, delete_user_moods, create_one_response, Response, query_user_memory, query_group_memory, update_one_user, register_user_api, clr_Green, clr_Red, clr_Yellow, clr_Off
 from api.huggingface import Models
-from api.LangchainGPT import Router, computeMoodScore, report
+from api.LangchainGPT import Router, computeMoodScore, report, Require
 from api import prompts, ChatGPT
 
 
@@ -75,6 +75,7 @@ async def linebot() -> None:
         ai_msg = msg[:1]  #咒語
         user = json_data["events"][0]["source"]["userId"]
         group = json_data["events"][0]["source"].get("groupId")
+        print(user)
         # 取出文字的前五個字元，轉換成小寫
         reply_msg = ''
         glog(f'{user}: {clr_Green}{msg}{clr_Off}')
@@ -96,7 +97,7 @@ async def linebot() -> None:
             mood_score=mood_score,
             # stable_score= statble_score
             ))
-
+        print(mood_score)
         profile = line_bot_api.get_profile(user)
         
         if group == None:
@@ -128,6 +129,7 @@ async def linebot() -> None:
             )
             ext_message = TextSendMessage(text='role') ## 測試回覆
             line_bot_api.reply_message(tk,text_message)
+            
 
         elif msg[:2] == '註冊':
             """更新user api"""
@@ -150,7 +152,10 @@ async def linebot() -> None:
         elif msg[:4] == '心情報告':
             """Langchain 方式來做"""
             response = report(mem)
-            text_message = TextSendMessage(text=f'Hello! {profile.display_name}你好！\n以下是你的心情報告\n\n{response}\nhttps://drive.google.com/file/d/1_8hH-UMOpyW0rOAuRbWi0bXBoN3oQRAZ/view')
+            key_point = ChatGPT.key_point(reply_msg, msg)
+            url = search_google(key_point + '. ' + msg, reply_msg)
+            await create_one_response(Response(user_id=user, group_id=group, ai_text=response),aimTo=newMood)
+            text_message = TextSendMessage(text=f'Hello! {profile.display_name}你好！\n以下是你的心情報告\n\n{response}\n{url}')
             line_bot_api.reply_message(tk,text_message)
             pass
             
@@ -160,12 +165,21 @@ async def linebot() -> None:
             line_bot_api.reply_message(tk,text_message)
             glog(f'There are {total} mood records has been deleted!')
         
+        elif mood_score == 1:
+            response = ChatGPT.emergency(msg)
+            await create_one_response(Response(user_id=user, group_id=group, ai_text=response),aimTo=newMood)
+            text_message = TextSendMessage(text=f'嘿！{profile.display_name}\n{response}')
+            line_bot_api.reply_message(tk,text_message)
+        
 
         
         elif msg[0] =='/':
             # 訊息發送給 OpenAI
             print('啟動咒語...')
-            reply_msg = Router(mem)
+            
+
+
+            reply_msg = ChatGPT.reply(mem)
             
             key_point = ChatGPT.key_point(reply_msg, msg)
             

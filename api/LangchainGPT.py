@@ -1,15 +1,16 @@
-from langchain.memory import ConversationSummaryBufferMemory
+from langchain.memory import ConversationSummaryBufferMemory, ConversationBufferWindowMemory, ChatMessageHistory 
 from langchain.memory import ConversationBufferWindowMemory
-from langchain.chat_models import ChatOpenAI
+from langchain_community.chat_models import ChatOpenAI
 from langchain.chains import LLMChain, SequentialChain
 from langchain.chains.router import MultiPromptChain
+# from langchain.chains.multi_prompt_prompt import MULTI_PROMPT_ROUTER_TEMPLATE
 from langchain.chains.router.llm_router import LLMRouterChain,RouterOutputParser
 
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder, PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain.output_parsers import ResponseSchema
-from langchain_openai import ChatOpenAI
+# from langchain_openai import ChatOpenAI
 
 
 import os 
@@ -32,7 +33,66 @@ llm = ChatOpenAI(temperature=0.7, model="gpt-4-0125-preview",api_key=os.environ.
 5. 
 """
 
+def Require(history):
+    prompt = ChatPromptTemplate.from_template(template=prompts.emotional_counseling())
+    chat = LLMChain(llm=llm, prompt=prompt)
+    print(history.messages)
+    response = chat(history.messages)
+
+    
+    return response.content
+    
+
+
 def Router(text):
+    """暫時先棄用"""
+    prompt_infos = [
+        {
+            "name": "friend_smalltalk", 
+            "description": "Good for answering at closed friend", 
+            "prompt_template": prompts.friend_smalltalk()
+        },
+        {
+            "name": "emotional_counseling", 
+            "description": "Good for answering emotional counseling", 
+            "prompt_template": prompts.emotional_counseling()
+        }
+    ]
+    
+    destination_chains = {}
+    for p_info in prompt_infos:
+        name = p_info["name"]
+        prompt_template = p_info["prompt_template"]
+        prompt = ChatPromptTemplate.from_template(template=prompt_template)
+        chain = LLMChain(llm=llm, prompt=prompt)
+        destination_chains[name] = chain  
+    
+    destinations = [f"{p['name']}: {p['description']}" for p in prompt_infos]
+    destinations_str = "\n".join(destinations)
+
+    default_prompt = ChatPromptTemplate.from_template("{input}")
+    default_chain = LLMChain(llm=llm, prompt=default_prompt, output_key='text')
+
+    MULTI_PROMPT_ROUTER_TEMPLATE = prompts.MULTI_PROMPT_ROUTER_TEMPLATE()
+    router_template = MULTI_PROMPT_ROUTER_TEMPLATE.format(destinations=destinations_str)
+    router_prompt = PromptTemplate(
+        template=router_template,
+        input_variables=["input"],
+        output_parser=RouterOutputParser(),
+    )
+    
+    router_chain = LLMRouterChain.from_llm(llm, router_prompt)
+    
+    chain = MultiPromptChain(router_chain=router_chain, 
+                             destination_chains=destination_chains, 
+                             default_chain=default_chain, verbose=True
+                            )
+    
+    response = chain.invoke(text)
+    print(response)
+    return response['text']
+
+    """
     prompt_infos = [
     {
         "name": "friend_smalltalk", 
@@ -73,9 +133,9 @@ def Router(text):
     destinations_str = "\n".join(destinations)
 
     default_prompt = ChatPromptTemplate.from_template("{input}")
-    default_chain = LLMChain(llm=llm, prompt=default_prompt)
-
-    MULTI_PROMPT_ROUTER_TEMPLATE = prompts.MULTI_PROMPT_ROUTER_TEMPLATE()
+    default_chain = LLMChain(llm=llm, output_key='text')#prompt=default_prompt)
+    
+    # MULTI_PROMPT_ROUTER_TEMPLATE = prompts.MULTI_PROMPT_ROUTER_TEMPLATE()
     router_template = MULTI_PROMPT_ROUTER_TEMPLATE.format(
         destinations=destinations_str
     )
@@ -91,9 +151,11 @@ def Router(text):
                          destination_chains=destination_chains, 
                          default_chain=default_chain, verbose=True
                         )
+    
     response = chain.invoke(text)
     print(response)
     return response['text']
+    """
     
 
     

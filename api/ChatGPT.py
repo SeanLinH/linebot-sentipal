@@ -28,6 +28,46 @@ events
 
 """
 
+def emergency(msg):
+    response = openai.chat.completions.create(
+                model= 'gpt-4-1106-preview', #'gpt-3.5-turbo-instruct', #'text-davinci-003',
+                temperature=0.1,
+                messages=[
+                    {
+                    "role": "system",
+                    "content": prompts.concern()
+                    },
+                    {
+                        "role": "user",
+                        "content": str(msg)
+                    }
+                    
+                ]
+                )
+    return response.choices[0].message.content
+
+def reply(mem):
+    response = openai.chat.completions.create(
+                model= 'gpt-4-1106-preview', #'gpt-3.5-turbo-instruct', #'text-davinci-003',
+                temperature=0.1,
+                messages=[
+                    {
+                    "role": "system",
+                    "content": prompts.emotional_counseling()
+                    },
+                    {
+                        "role": "user",
+                        "content": str(mem)
+                    }
+                    
+                ]
+                )
+    return response.choices[0].message.content
+
+
+
+
+
 def key_point(reply, msg):
     response = openai.chat.completions.create(
                 model= 'gpt-4-1106-preview', #'gpt-3.5-turbo-instruct', #'text-davinci-003',
