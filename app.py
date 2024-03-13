@@ -11,7 +11,7 @@ import json
 from dotenv import load_dotenv
 import os
 import asyncio
-from src.prisma import glog, create_one_mood, Mood, delete_user_moods, create_one_response, Response, query_user_memory, query_group_memory, update_one_user, register_user_api, clr_Green, clr_Red, clr_Yellow, clr_Off
+from src.prisma import glog, create_one_mood, Mood, delete_user_moods, create_one_response, Response, query_user_memory, query_group_memory, update_one_user, register_user_api, clr_Green, clr_Red, clr_Yellow, clr_Cyan, clr_Off
 from api.huggingface import Models
 from api.LangchainGPT import Router, computeMoodScore, report, Require
 from api import prompts, ChatGPT
@@ -97,8 +97,10 @@ async def linebot() -> None:
             mood_score=mood_score,
             # stable_score= statble_score
             ))
-        print(mood_score)
+        glog(mood_score)
+        glog(f'[LINE API call] +{clr_Yellow}line_bot_api.get_profile({clr_Cyan}{user}{clr_Yellow}){clr_Off}')
         profile = line_bot_api.get_profile(user)
+        glog(f'[LINE API call] -{clr_Yellow}line_bot_api.get_profile({clr_Cyan}{user}{clr_Yellow}){clr_Off} ... profile.display_name => {clr_Cyan}{profile.display_name}{clr_Off}')
         
         if group == None:
             total, mem = await query_user_memory(newMood.user_id, days=7)
