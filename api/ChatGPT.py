@@ -47,6 +47,7 @@ def emergency(msg):
     return response.choices[0].message.content
 
 def reply(mem):
+    msg = mem.split('\n')[-1]
     response = openai.chat.completions.create(
                 model= 'gpt-4-1106-preview', #'gpt-3.5-turbo-instruct', #'text-davinci-003',
                 temperature=0.1,
@@ -57,7 +58,7 @@ def reply(mem):
                     },
                     {
                         "role": "user",
-                        "content": str(mem)
+                        "content": f'My current question: {msg}. My past memroy: {mem}'
                     }
                     
                 ]
@@ -86,6 +87,41 @@ def key_point(reply, msg):
                 )
     return response.choices[0].message.content
 
+def event_detector(group_mem):
+    response = openai.chat.completions.create(
+                model= 'gpt-4-1106-preview', #'gpt-3.5-turbo-instruct', #'text-davinci-003',
+                temperature=0.1,
+                messages=[
+                    {
+                    "role": "system",
+                    "content": prompts.event_detect()
+                    },
+                    {
+                        "role": "user",
+                        "content": group_mem
+                    }
+                ]
+                )
+    return response.choices[0].message.content
+
+
+def summarize(group_mem, events):
+    response = openai.chat.completions.create(
+                model= 'gpt-4-1106-preview', #'gpt-3.5-turbo-instruct', #'text-davinci-003',
+                temperature=0.1,
+                messages=[
+                    {
+                    "role": "system",
+                    "content": prompts.summarize(events)
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Please Summarize our conversations: {group_mem}"
+                    }
+                ]
+                )
+    return response.choices[0].message.content
+    
 
 # def mood_score(user_id, group_id, text, mood,score):
     
