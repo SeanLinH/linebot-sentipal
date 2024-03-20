@@ -39,7 +39,7 @@ class Models:
             return self.det_lab.get(output[0][0].get('label'))
         except:
             print("reconnect detect_depression")
-            time.sleep(20)
+            time.sleep(2)
             return self.detect_depression()
 
     def go_emotion(self):
@@ -60,7 +60,7 @@ class Models:
             return output[0][0].get('label')
         except:
             print("reconnect go_emotion")
-            time.sleep(20)
+            time.sleep(2)
             return self.go_emotion()
 
     def translate(self):
@@ -81,7 +81,7 @@ class Models:
             return output[0].get('translation_text')
         except:
             print("reconnect translate")
-            time.sleep(20)
+            time.sleep(2)
             return self.translate()
     
     
@@ -103,7 +103,7 @@ class Models:
             return output.get('labels')[0]
         except:
             print("reconnect classifer")
-            time.sleep(20)
+            time.sleep(2)
             return self.classifer()
             
 
@@ -127,7 +127,7 @@ class Models:
             return output[0][0].get('label')
         except:
             print("reconnect postive_or_negative")
-            time.sleep(20)
+            time.sleep(2)
             return self.postive_or_negative()
 
 
