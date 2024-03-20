@@ -9,6 +9,7 @@ from src.prisma.findOneUser import find_one_user
 from src.prisma.group import Group
 from src.prisma.mood import Mood
 from src.prisma.queryGroupMemory import query_group_memory
+from src.prisma.queryAllGroupMemory import query_all_group_memory
 from src.prisma.queryUserMemory import query_user_memory
 from src.prisma.registerUserApi import register_user_api
 from src.prisma.response import Response
