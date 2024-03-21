@@ -174,8 +174,8 @@ async def linebot() -> None:
             """Langchain 方式來做"""
             # profile = line_bot_api.get_profile(user)
             response = report(mem)
-            key_point = ChatGPT.key_point(reply_msg, msg)
-            url = search_google(key_point + '. ' + msg, reply_msg)
+            key_point = ChatGPT.key_point(response, "")
+            url = search_google(key_point, "")
             await create_one_response(Response(user_id=user, group_id=group, ai_text=response),aimTo=newMood)
             text_message = TextSendMessage(text=f'Hello! 你好！\n以下是你的心情報告\n\n{response}\n{url}')
             line_bot_api.reply_message(tk,text_message)
@@ -186,8 +186,6 @@ async def linebot() -> None:
             # 訊息發送給 OpenAI
             print('啟動咒語...')
             
-
-
             reply_msg = ChatGPT.reply(mem)
             
             key_point = ChatGPT.key_point(reply_msg, msg)

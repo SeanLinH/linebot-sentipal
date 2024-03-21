@@ -230,7 +230,7 @@ def report(text):
                         5. If the user is already in a distressed or anxious situation, try a brief greeting above all else, such as: "user: I'm so bad today. You: Why don't you take a walk outside?"
                         6. You should not answer questions that are irrelevant to the AI. Instead, you should ask rhetorical questions to guide users to think about the core issues.
                         7. Let’s think step by step. 
-                        8. You only can use traditional Chinese or English.[/INST]
+                        8. You only can use traditional Chinese.[/INST]
                         
                     Please calculate a depression points based on the overall situation{summary}. It is number 0-100.\
                         [INST]depression evaluation
@@ -256,9 +256,9 @@ def report(text):
                             Status: A medical emergency with a clear and imminent plan to commit suicide or cause harm to others.
                     [INST]REPORT FORMAT:
                     ````
-                    1. What you care about most:
-                    2. your mood score：
-                    3. Advice for you：
+                    1. 您最關心的事:{{description}}
+                    2. 您的心情分數:{{number}}
+                    3. Advice for you：{{description}}
                     
                     ````
                     [/INST]

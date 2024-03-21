@@ -11,9 +11,9 @@ class Models:
     def __init__(self, text):
         self.text = text[:512]
 
-        self.pnn = {'positive': -1,
+        self.pnn = {'positive': 1,
                       'neutral': 0, 
-                      'negative': 1,
+                      'negative': -1,
                        None: None}
         self.det_lab = {'LABEL_0': 0,
                        'LABEL_1': 1, 
@@ -123,8 +123,8 @@ class Models:
         })
 
         try:
-            print(output[0][0].get('label'))
-            return output[0][0].get('label')
+            print(output[0][0].get('label'), self.pnn.get(output[0][0].get('label')))
+            return self.pnn.get(output[0][0].get('label'))
         except:
             print("reconnect postive_or_negative")
             time.sleep(2)
