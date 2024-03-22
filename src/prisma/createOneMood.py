@@ -52,8 +52,8 @@ async def create_one_mood_core(db: Prisma, mood: Mood) -> Mood:
 			},
 			'group_id': mood.group_id,
 			'user_text': mood.user_text,
-			# 'user_mood': None, 
-			'mood_score': 0,
+			'user_mood': mood.user_mood, 
+			'mood_score': mood.mood_score,
 			'stable_score': 0,
 			'engage': 0,
 			'lastUser': {

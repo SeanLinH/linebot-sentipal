@@ -163,7 +163,7 @@ async def linebot() -> None:
         #     statble_score = int(computeMoodScore(mem, user_mood, sentiment, mood_score))
 
         
-        if sentiment == 'negative' and user_mood in ['sadness','disappointment','annoyance', 'anger', 'grief', 'fear', 'disgust', 'remorse']:
+        if (sentiment == -1 or mood_score == 1) and user_mood in ['sadness','disappointment','annoyance', 'anger', 'grief', 'fear', 'disgust', 'remorse', 'desire']:
             print("自動關懷")
             response = ChatGPT.emergency(msg)
             await create_one_response(Response(user_id=user, group_id=group, ai_text=response),aimTo=newMood)
